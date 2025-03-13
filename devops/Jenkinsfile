@@ -1,1 +1,58 @@
+pipeline {
+    agent any  // Запуск на любом доступном агенте
 
+    environment {
+        // Определение переменных окружения
+        PROJECT_NAME = "my-app"
+        VERSION = "1.0.0"
+    }
+
+    stages {
+        // Этап сборки
+        stage('Build') {
+            steps {
+                echo "Сборка проекта ${PROJECT_NAME} версии ${VERSION}"
+                sh 'mvn clean package'  // Пример команды для сборки Maven-проекта
+            }
+        }
+
+        // Этап тестирования
+        stage('Test') {
+            steps {
+                echo "Запуск тестов"
+                sh 'mvn test'  // Пример команды для запуска тестов
+            }
+            post {
+                // Действия после завершения этапа
+                success {
+                    echo "Тесты прошли успешно!"
+                }
+                failure {
+                    echo "Тесты завершились с ошибками."
+                }
+            }
+        }
+
+        // Этап развёртывания
+        stage('Deploy') {
+            steps {
+                echo "Развёртывание приложения"
+                sh './deploy.sh'  // Пример скрипта для развёртывания
+            }
+        }
+    }
+
+    post {
+        // Действия после завершения всего Pipeline
+        success {
+            echo "Pipeline завершён успешно!"
+        }
+        failure {
+            echo "Pipeline завершён с ошибками."
+        }
+        always {
+            echo "Очистка рабочего пространства"
+            cleanWs()  // Очистка рабочей директории
+        }
+    }
+}
